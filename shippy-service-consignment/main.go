@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	// Import the generated protobuf code
 	"context"
 
 	pb "github.com/Vogel-Guo/shippy/shippy-service-consignment/proto/consignment"
+	vesselProto "github.com/Vogel-Guo/shippy/shippy-service-vessel/proto/vessel"
 	"github.com/micro/go-micro/v2"
 )
 
@@ -36,13 +38,29 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 // in the generated code itself for the exact method signatures etc
 // to give you a better idea.
 type consignmentService struct {
-	repo repository
+	repo         repository
+	vesselClient vesselProto.VesselService
 }
 
 // CreateConsignment - we created just one method on our service,
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
 func (s *consignmentService) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
+
+	// Here we call a client instance of our vessel service with our consignment weight,
+	// and the amount of containers as the capacity value
+	vesselResponse, err := s.vesselClient.FindAvailable(context.Background(), &vesselProto.Specification{
+		MaxWeight: req.Weight,
+		Capacity:  int32(len(req.Containers)),
+	})
+	log.Printf("Found vessel: %s \n", vesselResponse.Vessel.Name)
+	if err != nil {
+		return err
+	}
+
+	// We set the VesselId as the vessel we got back from our
+	// vessel service
+	req.VesselId = vesselResponse.Vessel.Id
 
 	// Save our consignment
 	consignment, err := s.repo.Create(req)
@@ -71,19 +89,20 @@ func main() {
 	service := micro.NewService(
 
 		// This name must match the package name given in your protobuf definition
-		micro.Name("shippy.service.consignment"),
+		micro.Name("go.micro.srv.consignment"),
+		micro.Version("latest"),
 	)
+
+	vesselClient := vesselProto.NewVesselService("go.micro.srv.vessel", service.Client())
 
 	// Init will parse the command line flags.
 	service.Init()
 
 	// Register service
-	if err := pb.RegisterShippingServiceHandler(service.Server(), &consignmentService{repo}); err != nil {
-		log.Panic(err)
-	}
+	pb.RegisterShippingServiceHandler(service.Server(), &consignmentService{repo, vesselClient})
 
 	// Run the server
 	if err := service.Run(); err != nil {
-		log.Panic(err)
+		fmt.Println(err)
 	}
 }
