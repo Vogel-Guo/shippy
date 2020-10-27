@@ -3,14 +3,14 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/micro/go-micro/v2"
 	"io/ioutil"
 	"log"
 	"os"
 
 	"context"
 
-	pb "github.com/Vogel-Guo/shippy/shippy-service-vessel/proto/vessel"
-	micro "github.com/micro/go-micro/v2"
+	pb "github.com/Vogel-Guo/shippy/shippy-service-consignment/proto/consignment"
 )
 
 const (
@@ -31,7 +31,7 @@ func main() {
 	service := micro.NewService(micro.Name("shippy.cli.consignment"))
 	service.Init()
 
-	client := pb.NewShippingService("shippy.service.vessel", service.Client())
+	client := pb.NewShippingService("shippy.service.consignment", service.Client())
 
 	// Contact the server and print out its response.
 	file := defaultFilename

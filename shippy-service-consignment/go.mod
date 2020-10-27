@@ -12,8 +12,8 @@ require (
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/micro/go-micro/v2 v2.9.1
-	github.com/stretchr/testify v1.6.1 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
+	go.mongodb.org/mongo-driver v1.4.2
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
@@ -24,6 +24,5 @@ require (
 
 replace (
 	github.com/Vogel-Guo/shippy/shippy-service-consignment => ../shippy-service-consignment
-	github.com/Vogel-Guo/shippy/shippy-service-vessel => ../shippy-service-vessel
 	google.golang.org/grpc v1.32.0 => google.golang.org/grpc v1.26.0
 )
